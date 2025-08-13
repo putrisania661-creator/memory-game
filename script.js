@@ -41,7 +41,7 @@ function startTimer() {
     document.getElementById('timer').textContent = timeLeft;
     if (timeLeft <= 0) {
       clearInterval(timer);
-      document.getElementById('status').textContent = '⏰ Waktu Habis! Game Over!';
+      document.getElementById('status').textContent = '⏰ Waktu Habis Sayang! Game Over!';
       lockBoard = true;
     }
   }, 1000);
@@ -100,7 +100,7 @@ function flipCard(e) {
 
     if (matchedPairs === cards.length / 2) {
       clearInterval(timer);
-      document.getElementById('status').textContent = '🎉 Level Selesai!';
+      document.getElementById('status').textContent = '🎉 Level Selesai "Sehat Selalu Cantik"!';
       setTimeout(() => {
         level++;
         startGame();
