@@ -1,57 +1,15 @@
-const allSymbols = ['🍎', '🍌', '🍇', '🍓', '🍒', '🍉', '🥝', '🍍', '🍑', '🥥', '🍋', '🍈'];
+const fruits = [
+  '🍓', '🍋', '🍇', '🍎', '🍌', '🍒', '🍍', '🥝'
+]; // 8 buah → 16 kartu total (2x setiap buah)
 
-let timer;
-let timeLeft = 60;
-let score = 0;
-let level = 1;
-let matchedPairs = 0;
-
+let cards = [...fruits, ...fruits]; // duplikat
 let firstCard = null;
 let secondCard = null;
 let lockBoard = false;
-let cards = [];
+let matches = 0;
 
-function startGame() {
-  resetGame();
-  generateCards();
-  createBoard();
-  startTimer();
-}
-
-function resetGame() {
-  firstCard = null;
-  secondCard = null;
-  lockBoard = false;
-  matchedPairs = 0;
-  timeLeft = 60;
-  updateHUD();
-  clearInterval(timer);
-}
-
-function updateHUD() {
-  document.getElementById('timer').textContent = timeLeft;
-  document.getElementById('score').textContent = score;
-  document.getElementById('level').textContent = level;
-  document.getElementById('status').textContent = '';
-}
-
-function startTimer() {
-  timer = setInterval(() => {
-    timeLeft--;
-    document.getElementById('timer').textContent = timeLeft;
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      document.getElementById('status').textContent = '⏰ Waktu Habis Sayang! Game Over!';
-      lockBoard = true;
-    }
-  }, 1000);
-}
-
-function generateCards() {
-  const symbolsToUse = allSymbols.slice(0, level + 2); // Naikkan jumlah kartu tiap level
-  cards = [...symbolsToUse, ...symbolsToUse];
-  shuffle(cards);
-}
+const gameBoard = document.getElementById("gameBoard");
+const message = document.getElementById("message");
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -61,69 +19,71 @@ function shuffle(array) {
 }
 
 function createBoard() {
-  const gameBoard = document.getElementById('gameBoard');
-  gameBoard.innerHTML = '';
-  gameBoard.style.gridTemplateColumns = `repeat(${Math.min(6, Math.ceil(Math.sqrt(cards.length)))}, 100px)`;
-
-  cards.forEach((symbol, index) => {
+  shuffle(cards);
+  cards.forEach(fruit => {
     const card = document.createElement('div');
     card.classList.add('card');
-    card.dataset.symbol = symbol;
-    card.dataset.index = index;
-    card.textContent = '';
-    card.addEventListener('click', flipCard);
+    card.dataset.fruit = fruit;
+
+    const inner = document.createElement('div');
+    inner.classList.add('card-inner');
+
+    const front = document.createElement('div');
+    front.classList.add('card-front');
+
+    const back = document.createElement('div');
+    back.classList.add('card-back');
+    back.textContent = fruit;
+
+    inner.appendChild(front);
+    inner.appendChild(back);
+    card.appendChild(inner);
+
+    card.addEventListener('click', () => flipCard(card));
     gameBoard.appendChild(card);
   });
 }
 
-function flipCard(e) {
-  if (lockBoard) return;
+function flipCard(card) {
+  if (lockBoard || card === firstCard || card.classList.contains('matched')) return;
 
-  const card = e.currentTarget;
-  if (card.classList.contains('flipped')) return;
-
-  card.classList.add('flipped');
-  card.textContent = card.dataset.symbol;
+  card.classList.add('flip');
 
   if (!firstCard) {
     firstCard = card;
-    return;
-  }
-
-  secondCard = card;
-  lockBoard = true;
-
-  if (firstCard.dataset.symbol === secondCard.dataset.symbol) {
-    matchedPairs++;
-    score += 10;
-    resetTurn();
-
-    if (matchedPairs === cards.length / 2) {
-      clearInterval(timer);
-      document.getElementById('status').textContent = '🎉 Level Selesai Hadiahnya Totebag "Sehat Selalu Cantik"!';
-      setTimeout(() => {
-        level++;
-        startGame();
-      }, 1500);
-    }
   } else {
-    score = Math.max(0, score - 5);
-    setTimeout(() => {
-      firstCard.classList.remove('flipped');
-      secondCard.classList.remove('flipped');
-      firstCard.textContent = '';
-      secondCard.textContent = '';
-      resetTurn();
-    }, 1000);
-  }
+    secondCard = card;
+    lockBoard = true;
 
-  updateHUD();
+    checkMatch();
+  }
 }
 
-function resetTurn() {
+function checkMatch() {
+  const isMatch = firstCard.dataset.fruit === secondCard.dataset.fruit;
+
+  if (isMatch) {
+    firstCard.classList.add('matched');
+    secondCard.classList.add('matched');
+    matches++;
+
+    if (matches === fruits.length) {
+      message.textContent = "🎉 Selamat! Kamu mencocokkan semua pasangan!";
+    }
+
+    resetBoard();
+  } else {
+    setTimeout(() => {
+      firstCard.classList.remove('flip');
+      secondCard.classList.remove('flip');
+      resetBoard();
+    }, 1000);
+  }
+}
+
+function resetBoard() {
   [firstCard, secondCard] = [null, null];
   lockBoard = false;
 }
 
-startGame();
-
+createBoard();
