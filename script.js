@@ -100,7 +100,7 @@ function flipCard(e) {
 
     if (matchedPairs === cards.length / 2) {
       clearInterval(timer);
-      document.getElementById('status').textContent = '🎉 Level Selesai "Sehat Selalu Cantik"!';
+      document.getElementById('status').textContent = '🎉 Level Selesai Hadiahnya Totebag "Sehat Selalu Cantik"!';
       setTimeout(() => {
         level++;
         startGame();
@@ -126,3 +126,4 @@ function resetTurn() {
 }
 
 startGame();
+
